@@ -1,0 +1,41 @@
+name: CI
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python: ['3.8', '3.9', '3.10']
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      - name: Setup Python ${{ matrix.python }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install Poetry and combpyter
+        run: |
+          pip install --user poetry
+          poetry install
+
+      - name: Run tests
+        run: |
+          poetry run pytest
+          poetry run pytest --module-doctests combpyter
