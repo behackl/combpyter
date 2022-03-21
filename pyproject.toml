@@ -1,8 +1,11 @@
 [tool.poetry]
 name = "combpyter"
 version = "0.0.1"
-description = ""
+description = "A lightweight Python library for generating combinatorial structures."
+repository = "https://github.com/behackl/combpyter"
+readme = "README.md"
 authors = ["Benjamin Hackl <devel@benjamin-hackl.at>"]
+license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.8"
