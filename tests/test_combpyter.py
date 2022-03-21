@@ -1,5 +1,4 @@
-from combpyter import __version__
+def test_import():
+    import combpyter
+    assert isinstance(combpyter.__version__, str)
 
-
-def test_version():
-    assert __version__ == '0.1.0'
