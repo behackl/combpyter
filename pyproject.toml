@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "combpyter"
-version = "0.0.1"
+version = "0.0.2"
 description = "A lightweight Python library for generating combinatorial structures."
 repository = "https://github.com/behackl/combpyter"
 readme = "README.md"
