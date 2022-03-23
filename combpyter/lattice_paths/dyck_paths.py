@@ -216,6 +216,10 @@ class DyckPath:
         >>> path = DyckPath([1, 1, 1, 0, 0, 0])
         >>> path.lalanne_kreweras_involution()
         Dyck path with steps [1, 0, 1, 0, 1, 0]
+        
+        >>> path = DyckPath([1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0])
+        >>> path.lalanne_kreweras_involution()
+        Dyck path with steps [1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0]
         """
         double_rises = []
         double_falls = []
@@ -231,8 +235,8 @@ class DyckPath:
                 if self.steps[ind + 1] == 0:
                     double_falls.append(current_downstep)
         
-        ascents = np.diff([0] + double_rises + [self.semilength])
-        descents = np.diff([0] + double_falls + [self.semilength])
+        ascents = np.diff([0] + double_falls + [self.semilength])
+        descents = np.diff([0] + double_rises + [self.semilength])
         return type(self).from_ascent_descent_code(ascents, descents)
 
 
