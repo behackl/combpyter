@@ -187,6 +187,46 @@ class DyckPath:
         return type(self)([1 - step for step in reversed(self.steps)])
 
 
+    def lalanne_kreweras_involution(self):
+        """The path resulting from applying the Lalanne-Kreweras involution.
+
+        The involution is constructed by labeling up- and down-steps and
+        denoting all starting indices of double rises and double falls,
+        respectively. After appending the semilength of the path to both
+        lists, the forwards differences describe the ascent-descent code of
+        the corresponding Dyck path.
+
+        References
+        ----------
+
+        `FindStat Map 00120 <https://www.findstat.org/MapsDatabase/Mp00120>`__
+
+        Examples
+        --------
+        
+        >>> path = DyckPath([1, 1, 1, 0, 0, 0])
+        >>> path.lalanne_kreweras_involution()
+        Dyck path with steps [1, 0, 1, 0, 1, 0]
+        """
+        double_rises = []
+        double_falls = []
+        current_upstep = 0
+        current_downstep = 0
+        for ind in range(len(self) - 1):
+            if self.steps[ind] == 1:
+                current_upstep += 1
+                if self.steps[ind + 1] == 1:
+                    double_rises.append(current_upstep)
+            else:
+                current_downstep += 1
+                if self.steps[ind + 1] == 0:
+                    double_falls.append(current_downstep)
+        
+        ascents = np.diff([0] + double_rises + [self.semilength])
+        descents = np.diff([0] + double_falls + [self.semilength])
+        return type(self).from_ascent_descent_code(ascents, descents)
+
+
 class DyckPaths:
     """Generator object for all Dyck paths of given semi-length."""
     element_class = DyckPath
