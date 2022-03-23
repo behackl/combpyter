@@ -1,9 +1,19 @@
+import pytest
+
 from combpyter import DyckPath, DyckPaths
 
 
 def test_dyck_path_number():
     counts = [len(DyckPaths(nn)) for nn in range(1, 6)]
     assert counts == [1, 2, 5, 14, 42]
+
+def test_dyck_path_check_unbalanced():
+    with pytest.raises(ValueError):
+        DyckPath([1, 1, 0])
+
+def test_dyck_path_check_excursion():
+    with pytest.raises(ValueError):
+        DyckPath([1, 0, 0, 1])
 
 def test_simple_path():
     path = DyckPath([1, 0, 1, 0, 1, 1, 0, 1, 0, 0])

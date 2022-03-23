@@ -16,8 +16,17 @@ class DyckPath:
             steps = steps.steps
         if check:
             n = len(steps) // 2
-            assert sum(steps) == n, "Up- and Down-steps are not balanced."
-            assert all([sum(steps[:k]) >= k/2 for k in range(n)]), "Path does not describe an excursion"
+            if sum(steps) != n:
+                raise ValueError(
+                        "Up- and down-steps in the step sequence" 
+                        f" {steps} are not balanced"
+                    )
+            cumulated_steps = [0] + list(np.cumsum(steps))
+            if not all([cumulated_steps[k] >= k/2 for k in range(len(steps) + 1)]):
+                raise ValueError(
+                        "The path described by the step sequence"
+                        f" {steps} does not describe an excursion"
+                    )
         self.steps = steps
     
     def __len__(self):
