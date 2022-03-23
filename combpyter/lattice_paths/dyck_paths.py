@@ -97,15 +97,16 @@ class DyckPath:
         By expanding a path, a new peak is inserted in all possible
         positions along the last ascent.
         """
+        PathClass = type(self)
         last_peak = self.peaks()[-1]
         for pos in range(last_peak+1, len(self)+1):
             prefix, postfix = self.steps[:pos], self.steps[pos:]
-            yield DyckPath(prefix + [1, 0] + postfix, check=False)
+            yield PathClass(prefix + [1, 0] + postfix, check=False)
 
     def last_upstep_reduction(self):
         """The path resulting from removing the last peak."""
         last_peak = self.peaks()[-1]
-        return DyckPath(self.steps[:last_peak] + self.steps[last_peak+2:], check=False)
+        return type(self)(self.steps[:last_peak] + self.steps[last_peak+2:], check=False)
 
     def plot(self, **kwargs):
         """Plots the Dyck path as a line diagram."""
@@ -122,6 +123,8 @@ class DyckPath:
 
 class DyckPaths:
     """Generator object for all Dyck paths of given semi-length."""
+    element_class = DyckPath
+
     def __init__(self, semilength):
         self.semilength = semilength
     
@@ -131,11 +134,11 @@ class DyckPaths:
 
     def __iter__(self):
         if self.semilength == 0:
-            yield DyckPath([])
+            yield self.element_class([])
         elif self.semilength == 1:
-            yield DyckPath([1, 0])
+            yield self.element_class([1, 0])
         else:
-            for path in DyckPaths(self.semilength - 1):
+            for path in type(self)(self.semilength - 1):
                 for expanded_path in path.last_upstep_expansion():
                     yield expanded_path
     
@@ -151,4 +154,4 @@ class DyckPaths:
         sloped_steps = (2*self.semilength + 1) * steps - (self.semilength + 1)
         ind = np.argmin(np.cumsum(sloped_steps)) + 1
         dyck_steps = list(steps[ind:]) + list(steps[:ind])
-        return DyckPath(dyck_steps[1:])
+        return self.element_class(dyck_steps[1:])
