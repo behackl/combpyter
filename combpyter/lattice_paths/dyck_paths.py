@@ -68,7 +68,10 @@ class DyckPath:
         return max(self.height_profile())
 
     def peaks(self):
-        """Returns all starting indices of peaks.
+        """Starting indices of the peaks of this path.
+
+        A peak is an occurrence of the pattern 1, 0 (an up-step
+        followed by a down-step).
         
         Examples
         --------
@@ -81,7 +84,7 @@ class DyckPath:
                 if self.steps[ind] == 1 and self.steps[ind+1] == 0]
 
     def valleys(self):
-        """Returns all starting indices of valleys.
+        """Starting indices of the valleys of this path.
         
         Examples
         --------
@@ -106,7 +109,7 @@ class DyckPath:
             yield PathClass(prefix + [1, 0] + postfix, check=False)
 
     def last_upstep_reduction(self):
-        """The path resulting from removing the last peak."""
+        """The Dyck path resulting from removing the last peak."""
         last_peak = self.peaks()[-1]
         return type(self)(self.steps[:last_peak] + self.steps[last_peak+2:], check=False)
 
