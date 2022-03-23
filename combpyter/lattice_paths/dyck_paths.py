@@ -124,6 +124,50 @@ class DyckPath:
         ax.set_aspect(1)
         return ax
 
+    def ascent_descent_code(self) -> tuple(list, list):
+        """The ascent-descent code of a Dyck path.
+
+        The ascent-descent code is a tuple ``(A, D)``, where
+        ``A`` and ``D`` are lists containing the ascent and
+        descent lengths of the path, respectively.
+
+        Examples
+        --------
+
+        >>> pth = DyckPath([1, 1, 0, 1, 1, 0, 0, 0])
+        >>> pth.ascent_descent_code()
+        ([2, 2], [1, 3])
+        """
+        descent_ascent_code = ([], [0])
+        current_type = 1
+        for step in self.steps:
+            if step == current_type:
+                descent_ascent_code[current_type][-1] += 1
+            else:
+                current_type = 1 - current_type
+                descent_ascent_code[current_type].append(1)
+
+        descents, ascents = descent_ascent_code
+        return ascents, descents
+
+    @classmethod
+    def from_ascent_descent_code(cls, ascents: list, descents: list) -> cls:
+        """The Dyck path corresponding to the specified ascent-descent code.
+
+        Examples
+        --------
+
+        >>> ascents, descents = [2, 2], [1, 3]
+        >>> DyckPath.from_ascent_descent_code(ascents, descents)
+        Dyck path with steps [1, 1, 0, 1, 1, 0, 0, 0]
+        """
+        if semilength := len(ascents) != len(descents):
+            raise ValueError("The specified ascent and descent lists do not have the same length")
+        step_sequence = []
+        for asc, desc in zip(ascents, descents):
+            step_sequence.extend([1] * asc + [0] * desc)
+
+        return cls(step_sequence)
 
 
 class DyckPaths:
