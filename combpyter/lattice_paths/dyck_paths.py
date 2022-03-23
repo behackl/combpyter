@@ -169,6 +169,23 @@ class DyckPath:
 
         return cls(step_sequence)
 
+    def reverse_involution(self):
+        """The path resulting from taking the complement of the reversed path.
+
+        References
+        ----------
+
+        `FindStat Map 00028 <https://www.findstat.org/MapsDatabase/Mp00028/>`__
+
+        Examples
+        --------
+
+        >>> path = DyckPath([1, 1, 0, 0, 1, 0])
+        >>> path.reverse_involution()
+        Dyck path with steps [1, 0, 1, 1, 0, 0]
+        """
+        return type(self)([1 - step for step in reversed(self.steps)])
+
 
 class DyckPaths:
     """Generator object for all Dyck paths of given semi-length."""
