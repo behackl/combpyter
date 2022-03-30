@@ -76,34 +76,164 @@ class DyckPath:
         """Returns the height of the path."""
         return max(self.height_profile())
 
-    def peaks(self):
+    def peaks(self, order: int | None = None) -> list(int):
         """Starting indices of the peaks of this path.
 
         A peak is an occurrence of the pattern 1, 0 (an up-step
         followed by a down-step).
+
+        Parameters
+        ----------
+
+        order
+            If set to an integer d, only the starting indices
+            of d-peaks are returned.
+            
         
         Examples
         --------
 
-        >>> path = DyckPath([1, 1, 0, 1, 0, 1, 0, 0])
+        >>> path = DyckPath([1, 1, 0, 0, 1, 1, 0, 1, 0, 0])
         >>> path.peaks()
-        [1, 3, 5]
+        [1, 5, 7]
+        >>> path.peaks(order=1)
+        [5, 7]
+        >>> path.peaks(order=2)
+        [0]
+        >>> path.peaks(order=3)
+        []
         """
-        return [ind for ind in range(len(self) - 1)
-                if self.steps[ind] == 1 and self.steps[ind+1] == 0]
+        if order is None:
+            return [ind for ind in range(len(self) - 1)
+                    if self.steps[ind] == 1 and self.steps[ind+1] == 0]
 
-    def valleys(self):
+        ascents, descents = self.ascent_descent_code()
+        peak_index_orders = []
+        current_index = 0
+        for a, d in zip(ascents, descents):
+            peak_order = min(a, d)
+            current_index += a
+            peak_index_orders.append((current_index - peak_order, peak_order))
+            current_index += d
+        return [ind for (ind, ord) in peak_index_orders if ord == order]
+
+    def valleys(self, order: int | None = None) -> list(int):
         """Starting indices of the valleys of this path.
+
+        A valley is an occurrence of the pattern 0, 1 (a down-step
+        followed by an up-step).
+
+        Parameters
+        ----------
+
+        order
+            If set to an integer d, only the starting indices
+            of d-valleys are returned.
         
         Examples
         --------
 
-        >>> path = DyckPath([1, 1, 0, 1, 0, 1, 0, 0])
+        >>> path = DyckPath([1, 1, 0, 0, 1, 1, 0, 1, 0, 0])
         >>> path.valleys()
+        [3, 6]
+        >>> path.valleys(order=1)
+        [6]
+        >>> path.valleys(order=2)
+        [2]
+        >>> path.valleys(order=3)
+        []
+        """
+        if order is None:
+            return [ind for ind in range(len(self) - 1)
+                    if self.steps[ind] == 0 and self.steps[ind+1] == 1]
+
+        ascents, descents = self.ascent_descent_code()
+        valley_index_orders = []
+        current_index = ascents[0]
+        for ind in range(len(ascents) - 1):
+            valley_order = min(descents[ind], ascents[ind+1])
+            current_index += descents[ind]
+            valley_index_orders.append((current_index - valley_order, valley_order))
+            current_index += ascents[ind + 1]
+
+        return [ind for (ind, ord) in valley_index_orders if ord == order]
+
+    def falls(self, order: int | None = None) -> list(int):
+        """Starting indices of falls of this path.
+
+        Parameters
+        ----------
+
+        order
+            If order is set to a positive integer d, only the
+            starting indices of d-falls (maximal sequences of d
+            consecutive down-steps) are returned.
+
+
+        Examples
+        --------
+
+        >>> path = DyckPath([1, 1, 0, 1, 0, 1, 0, 0])
+        >>> path.falls()
+        [2, 4, 6]
+        >>> path.falls(order=2)
+        [6]
+        >>> path.falls(order=1)
         [2, 4]
         """
-        return [ind for ind in range(len(self) - 1)
-                if self.steps[ind] == 0 and self.steps[ind+1] == 1]
+        ascents, descents = self.ascent_descent_code()
+        ascent_index_order = []
+        current_index = 0
+        for a, d in zip(ascents, descents): 
+            current_index += a
+            ascent_index_order.append((current_index, d))
+            current_index += d
+
+        if order is not None:
+            ascent_index_order = [
+                (ind, ord) for (ind, ord) in ascent_index_order 
+                if ord == order
+            ]
+        return [ind for (ind, ord) in ascent_index_order]
+
+
+    def rises(self, order: int | None = None) -> list(int):
+        """Starting indices of rises of this path.
+
+        Parameters
+        ----------
+
+        order
+            If order is set to a positive integer d, only the
+            starting indices of d-rises (maximal sequences of d
+            consecutive up-steps) are returned.
+
+
+        Examples
+        --------
+
+        >>> path = DyckPath([1, 1, 0, 1, 0, 1, 0, 0])
+        >>> path.rises()
+        [0, 3, 5]
+        >>> path.rises(order=2)
+        [0]
+        >>> path.rises(order=1)
+        [3, 5]
+        """
+        ascents, descents = self.ascent_descent_code()
+        ascent_index_order = []
+        current_index = 0
+        for a, d in zip(ascents, descents): 
+            ascent_index_order.append((current_index, a))
+            current_index += a + d
+
+        if order is not None:
+            ascent_index_order = [
+                (ind, ord) for (ind, ord) in ascent_index_order 
+                if ord == order
+            ]
+        return [ind for (ind, ord) in ascent_index_order]
+
     
     def last_upstep_expansion(self):
         """Generator for Dyck paths that can be obtained by expanding this path.
