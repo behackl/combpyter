@@ -1,5 +1,6 @@
 import pytest
 
+from collections import defaultdict
 from combpyter import DyckPath, DyckPaths
 
 
@@ -51,3 +52,20 @@ def test_last_upstep_expansion():
 def test_last_upstep_reduction():
     path = DyckPath([1, 1, 0, 1, 0, 0])
     assert path.last_upstep_reduction() == DyckPath([1, 1, 0, 0])
+
+def test_narayana():
+    peak_distribution = defaultdict(int)
+    for path in DyckPaths(8):
+        num_peaks = len(path.peaks())
+        peak_distribution[num_peaks] += 1
+
+    assert peak_distribution == {
+        1: 1,
+        2: 28,
+        3: 196,
+        4: 490,
+        5: 490,
+        6: 196,
+        7: 28,
+        8: 1,
+    }
