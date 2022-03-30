@@ -122,16 +122,26 @@ class DyckPath:
         last_peak = self.peaks()[-1]
         return type(self)(self.steps[:last_peak] + self.steps[last_peak+2:], check=False)
 
-    def plot(self, **kwargs):
-        """Plots the Dyck path as a line diagram."""
-        import matplotlib.pyplot as plt
-        fig, ax = plt.subplots(**kwargs)
-        ax.plot(self.height_profile())
-        ax.set_xticks(range(len(self) + 1))
-        ax.set_yticks(range(self.semilength + 1))
-        ax.grid()
-        ax.set_aspect(1)
-        return ax
+    def plot(self, axes=None, **kwargs):
+        """Plots the Dyck path as a line diagram.
+
+        Parameters
+        ----------
+
+        axes
+            The matplotlib axes that should be used to plot the path.
+            If None, a new one will be created.
+        """
+        if axes is None:
+            import matplotlib.pyplot as plt
+            fig, axes = plt.subplots(**kwargs)
+            
+        axes.plot(self.height_profile())
+        axes.set_xticks(range(len(self) + 1))
+        axes.set_yticks(range(self.semilength + 1))
+        axes.grid()
+        axes.set_aspect(1)
+        return axes
 
     def ascent_descent_code(self) -> tuple(list, list):
         """The ascent-descent code of a Dyck path.
