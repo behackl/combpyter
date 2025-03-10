@@ -19,23 +19,23 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        python: ['3.8', '3.9', '3.10']
+        python: ['3.10', '3.11', '3.12', '3.13']
 
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Python ${{ matrix.python }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
 
-      - name: Install Poetry and combpyter
-        run: |
-          pip install --user poetry
-          poetry install
+      - uses: astral-sh/setup-uv@v5
+      
+      - name: Install dependencies and package
+        run: uv sync
 
       - name: Run tests
         run: |
-          poetry run pytest
-          poetry run pytest --doctest-modules combpyter
+          uv run pytest
+          uv run pytest --doctest-modules combpyter
