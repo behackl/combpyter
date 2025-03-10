@@ -4,13 +4,14 @@ import numpy as np
 from math import comb
 
 __all__ = [
-        "DyckPath",
-        "DyckPaths",
+    "DyckPath",
+    "DyckPaths",
 ]
 
 
 class DyckPath:
     """Sequences of up- and down-steps that represent Dyck paths."""
+
     def __init__(self, steps, check=True) -> None:
         if isinstance(steps, DyckPath):
             steps = steps.steps
@@ -18,20 +19,19 @@ class DyckPath:
             n = len(steps) // 2
             if sum(steps) != n:
                 raise ValueError(
-                        "Up- and down-steps in the step sequence" 
-                        f" {steps} are not balanced"
-                    )
+                    f"Up- and down-steps in the step sequence {steps} are not balanced"
+                )
             cumulated_steps = [0] + list(np.cumsum(steps))
-            if not all([cumulated_steps[k] >= k/2 for k in range(len(steps) + 1)]):
+            if not all([cumulated_steps[k] >= k / 2 for k in range(len(steps) + 1)]):
                 raise ValueError(
-                        "The path described by the step sequence"
-                        f" {steps} does not describe an excursion"
-                    )
+                    "The path described by the step sequence"
+                    f" {steps} does not describe an excursion"
+                )
         self.steps = steps
-    
+
     def __len__(self):
         return len(self.steps)
-    
+
     def __repr__(self):
         return f"Dyck path with steps {self.steps}"
 
@@ -49,8 +49,10 @@ class DyckPath:
         return len(self.steps) // 2
 
     def pretty_repr(self):
-        string_mat = [[" " if i <= j else "." for j in range(self.semilength+1)]
-            for i in range(self.semilength+1)]
+        string_mat = [
+            [" " if i <= j else "." for j in range(self.semilength + 1)]
+            for i in range(self.semilength + 1)
+        ]
         string_mat[0][0] = "_"
         i, j = 0, 0
         for step in self.steps:
@@ -60,7 +62,7 @@ class DyckPath:
             else:
                 i += 1
                 string_mat[i][j] = "|"
-        for i in range(1, self.semilength+1):
+        for i in range(1, self.semilength + 1):
             for j in range(i, self.semilength + 1):
                 if string_mat[i][j] == " ":
                     string_mat[i][j] = "o"
@@ -71,7 +73,7 @@ class DyckPath:
     def height_profile(self):
         """Returns the height profile of the path."""
         return [0] + list(np.cumsum(2 * np.array(self.steps) - 1))
-    
+
     def height(self):
         """Returns the height of the path."""
         return max(self.height_profile())
@@ -88,8 +90,8 @@ class DyckPath:
         order
             If set to an integer d, only the starting indices
             of d-peaks are returned.
-            
-        
+
+
         Examples
         --------
 
@@ -104,8 +106,11 @@ class DyckPath:
         []
         """
         if order is None:
-            return [ind for ind in range(len(self) - 1)
-                    if self.steps[ind] == 1 and self.steps[ind+1] == 0]
+            return [
+                ind
+                for ind in range(len(self) - 1)
+                if self.steps[ind] == 1 and self.steps[ind + 1] == 0
+            ]
 
         ascents, descents = self.ascent_descent_code()
         peak_index_orders = []
@@ -129,7 +134,7 @@ class DyckPath:
         order
             If set to an integer d, only the starting indices
             of d-valleys are returned.
-        
+
         Examples
         --------
 
@@ -144,14 +149,17 @@ class DyckPath:
         []
         """
         if order is None:
-            return [ind for ind in range(len(self) - 1)
-                    if self.steps[ind] == 0 and self.steps[ind+1] == 1]
+            return [
+                ind
+                for ind in range(len(self) - 1)
+                if self.steps[ind] == 0 and self.steps[ind + 1] == 1
+            ]
 
         ascents, descents = self.ascent_descent_code()
         valley_index_orders = []
         current_index = ascents[0]
         for ind in range(len(ascents) - 1):
-            valley_order = min(descents[ind], ascents[ind+1])
+            valley_order = min(descents[ind], ascents[ind + 1])
             current_index += descents[ind]
             valley_index_orders.append((current_index - valley_order, valley_order))
             current_index += ascents[ind + 1]
@@ -184,18 +192,16 @@ class DyckPath:
         ascents, descents = self.ascent_descent_code()
         ascent_index_order = []
         current_index = 0
-        for a, d in zip(ascents, descents): 
+        for a, d in zip(ascents, descents):
             current_index += a
             ascent_index_order.append((current_index, d))
             current_index += d
 
         if order is not None:
             ascent_index_order = [
-                (ind, ord) for (ind, ord) in ascent_index_order 
-                if ord == order
+                (ind, ord) for (ind, ord) in ascent_index_order if ord == order
             ]
         return [ind for (ind, ord) in ascent_index_order]
-
 
     def rises(self, order: int | None = None) -> list(int):
         """Starting indices of rises of this path.
@@ -223,34 +229,34 @@ class DyckPath:
         ascents, descents = self.ascent_descent_code()
         ascent_index_order = []
         current_index = 0
-        for a, d in zip(ascents, descents): 
+        for a, d in zip(ascents, descents):
             ascent_index_order.append((current_index, a))
             current_index += a + d
 
         if order is not None:
             ascent_index_order = [
-                (ind, ord) for (ind, ord) in ascent_index_order 
-                if ord == order
+                (ind, ord) for (ind, ord) in ascent_index_order if ord == order
             ]
         return [ind for (ind, ord) in ascent_index_order]
 
-    
     def last_upstep_expansion(self):
         """Generator for Dyck paths that can be obtained by expanding this path.
-        
+
         By expanding a path, a new peak is inserted in all possible
         positions along the last ascent.
         """
         PathClass = type(self)
         last_peak = self.peaks()[-1]
-        for pos in range(last_peak+1, len(self)+1):
+        for pos in range(last_peak + 1, len(self) + 1):
             prefix, postfix = self.steps[:pos], self.steps[pos:]
             yield PathClass(prefix + [1, 0] + postfix, check=False)
 
     def last_upstep_reduction(self):
         """The Dyck path resulting from removing the last peak."""
         last_peak = self.peaks()[-1]
-        return type(self)(self.steps[:last_peak] + self.steps[last_peak+2:], check=False)
+        return type(self)(
+            self.steps[:last_peak] + self.steps[last_peak + 2 :], check=False
+        )
 
     def plot(self, axes=None, **kwargs):
         """Plots the Dyck path as a line diagram.
@@ -264,8 +270,9 @@ class DyckPath:
         """
         if axes is None:
             import matplotlib.pyplot as plt
+
             fig, axes = plt.subplots(**kwargs)
-            
+
         axes.plot(self.height_profile())
         axes.set_xticks(range(len(self) + 1))
         axes.set_yticks(range(self.semilength + 1))
@@ -300,7 +307,7 @@ class DyckPath:
         return ascents, descents
 
     @classmethod
-    def from_ascent_descent_code(cls, ascents: list, descents: list) -> cls:
+    def from_ascent_descent_code(cls, ascents: list, descents: list) -> DyckPath:
         """The Dyck path corresponding to the specified ascent-descent code.
 
         Examples
@@ -311,7 +318,9 @@ class DyckPath:
         Dyck path with steps [1, 1, 0, 1, 1, 0, 0, 0]
         """
         if semilength := len(ascents) != len(descents):
-            raise ValueError("The specified ascent and descent lists do not have the same length")
+            raise ValueError(
+                "The specified ascent and descent lists do not have the same length"
+            )
         step_sequence = []
         for asc, desc in zip(ascents, descents):
             step_sequence.extend([1] * asc + [0] * desc)
@@ -335,7 +344,6 @@ class DyckPath:
         """
         return type(self)([1 - step for step in reversed(self.steps)])
 
-
     def lalanne_kreweras_involution(self):
         """The path resulting from applying the Lalanne-Kreweras involution.
 
@@ -352,11 +360,11 @@ class DyckPath:
 
         Examples
         --------
-        
+
         >>> path = DyckPath([1, 1, 1, 0, 0, 0])
         >>> path.lalanne_kreweras_involution()
         Dyck path with steps [1, 0, 1, 0, 1, 0]
-        
+
         >>> path = DyckPath([1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0])
         >>> path.lalanne_kreweras_involution()
         Dyck path with steps [1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0]
@@ -374,7 +382,7 @@ class DyckPath:
                 current_downstep += 1
                 if self.steps[ind + 1] == 0:
                     double_falls.append(current_downstep)
-        
+
         ascents = np.diff([0] + double_falls + [self.semilength])
         descents = np.diff([0] + double_rises + [self.semilength])
         return type(self).from_ascent_descent_code(ascents, descents)
@@ -382,14 +390,15 @@ class DyckPath:
 
 class DyckPaths:
     """Generator object for all Dyck paths of given semi-length."""
+
     element_class = DyckPath
 
     def __init__(self, semilength):
         self.semilength = semilength
-    
+
     def __len__(self):
         n = self.semilength
-        return comb(2*n, n) // (n+1)
+        return comb(2 * n, n) // (n + 1)
 
     def __iter__(self):
         if self.semilength == 0:
@@ -400,7 +409,7 @@ class DyckPaths:
             for path in type(self)(self.semilength - 1):
                 for expanded_path in path.last_upstep_expansion():
                     yield expanded_path
-    
+
     def random_element(self):
         """Generate a random Dyck path in this family.
 
@@ -410,7 +419,7 @@ class DyckPaths:
         """
         steps = [0] * self.semilength + [1] * (self.semilength + 1)
         steps = np.random.permutation(steps)
-        sloped_steps = (2*self.semilength + 1) * steps - (self.semilength + 1)
+        sloped_steps = (2 * self.semilength + 1) * steps - (self.semilength + 1)
         ind = np.argmin(np.cumsum(sloped_steps)) + 1
         dyck_steps = list(steps[ind:]) + list(steps[:ind])
         return self.element_class(dyck_steps[1:])
